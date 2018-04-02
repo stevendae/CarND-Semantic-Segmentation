@@ -87,6 +87,7 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
                                 num_classes,
                                 4,
                                 strides=(2,2),
+                                padding = 'same',
                                 kernel_initializer = init,
                                 kernel_regularizer = reg)
 
@@ -103,6 +104,7 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
                                 num_classes,
                                 16,
                                 strides=(8,8),
+                                padding = 'same',
                                 kernel_initializer = init,
                                 kernel_regularizer = reg)
 
