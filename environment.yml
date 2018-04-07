@@ -1,0 +1,16 @@
+usage: conda-env [-h] {attach,create,export,list,remove,upload,update} ...
+
+positional arguments:
+  {attach,create,export,list,remove,upload,update}
+    attach              Embeds information describing your conda environment
+                        into the notebook metadata
+    create              Create an environment based on an environment file
+    export              Export a given environment
+    list                List the Conda environments
+    remove              Remove an environment
+    upload              Upload an environment to anaconda.org
+    update              Update the current environment based on environment
+                        file
+
+optional arguments:
+  -h, --help            Show this help message and exit.
