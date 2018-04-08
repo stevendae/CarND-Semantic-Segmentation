@@ -59,6 +59,9 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
     init = tf.random_normal_initializer(stddev=0.01)
     reg = tf.contrib.layers.l2_regularizer(1e-3)
 
+    vgg_layer3_out_scaled = tf.multiply(vgg_layer3_out, 0.0001)
+    vgg_layer4_out_scaled = tf.multiply(vgg_layer4_out, 0.01)
+
     conv7_1x1 = tf.layers.conv2d(vgg_layer7_out,
                                 num_classes,
                                 1,
@@ -74,7 +77,7 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
                                 kernel_initializer = init,
                                 kernel_regularizer = reg)
 
-    conv4_1x1 = tf.layers.conv2d(vgg_layer4_out,
+    conv4_1x1 = tf.layers.conv2d(vgg_layer4_out_scaled,
                                 num_classes,
                                 1,
                                 padding='same',
@@ -91,7 +94,7 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
                                 kernel_initializer = init,
                                 kernel_regularizer = reg)
 
-    conv3_1x1 = tf.layers.conv2d(vgg_layer3_out,
+    conv3_1x1 = tf.layers.conv2d(vgg_layer3_out_scaled,
                                 num_classes,
                                 1,
                                 padding='same',
@@ -122,10 +125,13 @@ def optimize(nn_last_layer, correct_label, learning_rate, num_classes):
     :return: Tuple of (logits, train_op, cross_entropy_loss)
     """
     # TODO: Implement function
-    logits = tf.reshape(nn_last_layer, (-1, num_classes))
-    labels = tf.reshape(correct_label, (-1, num_classes))
+    logits = nn_last_layer #tf.reshape(nn_last_layer, (-1, num_classes))
+    labels = correct_label #tf.reshape(correct_label, (-1, num_classes))
 
-    cross_entropy_loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits = logits, labels = labels))
+    reg_losses = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)
+    reg_constant = 1
+
+    cross_entropy_loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits = logits, labels = labels)) + reg_constant*sum(reg_losses)
     train_op = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cross_entropy_loss)
     return logits, train_op, cross_entropy_loss
 tests.test_optimize(optimize)
@@ -150,7 +156,7 @@ def train_nn(sess, epochs, batch_size, get_batches_fn, train_op, cross_entropy_l
     for epoch in range(epochs):
         for image, label in get_batches_fn(batch_size):
             #training
-            train_var, loss = sess.run([train_op, cross_entropy_loss], feed_dict={input_image: image, correct_label: label, keep_prob: 0.5, learning_rate: 1e-4})
+            train_var, loss = sess.run([train_op, cross_entropy_loss], feed_dict={input_image: image, correct_label: label, keep_prob: keep_prob, learning_rate: 1e-4})
             print ('epoch: %i, loss: %f'%(epoch, loss))
 tests.test_train_nn(train_nn)
 
@@ -190,11 +196,10 @@ def run():
         sess.run(tf.global_variables_initializer())
         save_model = tf.train.Saver()
 
-
-
         # TODO: Train NN using the train_nn function
         epochs = 5
         batch_size = 1
+        print(sess.run(tf.trainable_variables()))
         train_nn(sess, epochs, batch_size, get_batches_fn, train_op, cross_entropy_loss, input_image,
                      correct_label, keep_prob, learning_rate)
         # TODO: Save inference data using helper.save_inference_samples
