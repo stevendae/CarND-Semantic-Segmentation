@@ -72,7 +72,7 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
     """
     # TODO: Implement function
     init = tf.random_normal_initializer(stddev=0.01)
-    reg = tf.contrib.layers.l2_regularizer(1e-3)
+    reg = tf.contrib.layers.l2_regularizer(0.001)
 
     # The ouputs of pooling layers 3 and 4 are scaled before,
     # they are fed into the 1x1 convlutions
